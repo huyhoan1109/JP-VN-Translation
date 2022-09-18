@@ -1,9 +1,9 @@
-import config
-import pickle
 import torch
 from torch.autograd import Variable
 from torch.utils.data import Dataset
 
+import config
+import pickle
 from janome.analyzer import Analyzer
 from janome.tokenizer import Tokenizer as JPTKZ
 from vws import RDRSegmenter as RDR, Tokenizer as VNTKZ
@@ -15,9 +15,6 @@ jptk = JPTKZ()
 analyzer = Analyzer(char_filters=config.JP_CHAR_FILTERS, tokenizer=jptk, token_filters=config.TOKEN_FILTERS)
 
 class Vocab:
-    """
-     Holds vocabulary for each language and dictionaries to convert words to and from indexes
-    """
     def __init__(self, name, use_jp=False, use_vi=False):
         self.name = name
         self.word2index = {"SOS": 0, "EOS": 1}
@@ -67,22 +64,6 @@ class Vocab:
         return self.n_words
 
 class VocabDataset(Dataset):
-    def __init__(self, input_vocab, output_vocab):
-        self.input_vocab = input_vocab 
-        self.output_vocab = output_vocab
-        self.j2v = input_vocab.use_jp
-    
-    def __len__(self):
-        return len(self.input_vocab)
-
-    def __getitem__(self):
-        return len()
-
-class LangDataset(Dataset):
-    """ 
-    Subclass of Pytorch Dataset.
-    Holds sentence data from both languages.
-    """
     def __init__(self, pairs, input_lang, output_lang, max_length=30):
         self.pairs = pairs
         self.input_lang = input_lang
