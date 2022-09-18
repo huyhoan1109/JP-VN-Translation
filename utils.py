@@ -1,8 +1,7 @@
 import os
 import time
-import lang
+import vocab
 import config
-import pickle
 import argparse
 from tqdm import tqdm
 
@@ -13,9 +12,14 @@ def _getlines_txt(path):
     return lines
 
 def preprocess(dataset_dir, use:float=1, j2v:bool=True):
+    # Start performance time counter
     start = time.perf_counter()
+    
+    # Whether directory is existed or not
     if not os.path.exists(config.VOCAB_DIR):
         os.mkdir(config.VOCAB_DIR)
+    
+    # If no vocabulary => create
     if len(os.listdir(config.VOCAB_DIR)) == 0:
         # Creating in and target tokens
         input_file = dataset_dir + '/data-ja.txt' if j2v else dataset_dir + '/data-vi.txt'
@@ -30,8 +34,8 @@ def preprocess(dataset_dir, use:float=1, j2v:bool=True):
         use_out_lines = out_lines[:use_len]
 
         # Initializing languages
-        input_lang = lang.Vocab('ja', use_jp=True) if j2v else lang.Vocab('vi', use_vi=True)
-        out_lang = lang.Vocab('vi', use_vi=True) if j2v else lang.Vocab('ja', use_jp=True)
+        input_lang = vocab.Vocab('ja', use_jp=True) if j2v else vocab.Vocab('vi', use_vi=True)
+        out_lang = vocab.Vocab('vi', use_vi=True) if j2v else vocab.Vocab('ja', use_jp=True)
         pbar = tqdm(zip(use_input_lines, use_out_lines), total=use_len, leave=False)
         
         # Loading sentences
@@ -43,6 +47,8 @@ def preprocess(dataset_dir, use:float=1, j2v:bool=True):
         # Saving languages
         input_lang.save(config.VOCAB_DIR)
         out_lang.save(config.VOCAB_DIR)
+    
+    # End performance time counter
     end = time.perf_counter()
     print(f'Finished processing in {round(end-start, 3)} seconds')
 
@@ -53,7 +59,6 @@ def init_args(args):
         chosen_dir = config.DATASETS_DIR+args.choose
         if not os.path.exists(chosen_dir):
             raise ValueError("Can't find the choosen dataset")
-       # print(args.use, args.j2v)
         preprocess(chosen_dir, args.use, args.j2v)
         
 if __name__ == '__main__':
@@ -64,12 +69,4 @@ if __name__ == '__main__':
     parser.add_argument('-j2v', '--j2v', choices=[True, False], default=True, help='How much dataset used to create vocab')
     args = parser.parse_args()
     init_args(args)
-    # with open('./vocab/ja.pk', 'rb') as f:
-    #     ja = pickle.load(f)
-    #     f.close()
-    # with open('./vocab/vi.pk', 'rb') as f:
-    #     vi = pickle.load(f)
-    #     f.close()
-    # print(len(ja))
-    # print(len(vi))
     
