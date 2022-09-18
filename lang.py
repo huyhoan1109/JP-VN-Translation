@@ -24,23 +24,17 @@ class Vocab:
         self.word2count = {"SOS": 0, "EOS": 0}
         self.index2word = {0: "SOS", 1: "EOS"}
         self.n_words = 2
+        if use_jp:
+            if use_vi:
+                ValueError("Can't use multiple tokenizers!")
         self.use_jp = use_jp
         self.use_vi = use_vi
-    
-    def _drop_filters(self, sentence):
-        return ''.join([char for char in sentence if char not in config.FILTERS]).strip().lower()
 
     def add_sentence(self, sentence):
-        if not self.use_jp and not self.use_vi:
-            for word in sentence.split(" "):
-                self.add_word(word)
-        elif self.use_jp:
-            sen = ''.join([w for w in analyzer.analyze(sentence)])
-            [self.add_word(w) for w in analyzer.analyze(self._drop_filters(sen))]
-        elif self.use_vi:
-            sen = self._drop_filters(sentence)
-            [self.add_word(w) for w in rdr.segmentRawSentences(vntk, sen).split(' ')]
-    
+        words = word_segment(self, sentence)
+        for w in words:
+            self.add_word(w)
+
     def add_word(self, word):
         if word in self.word2count:
             self.word2count[word] += 1
@@ -76,9 +70,62 @@ class VocabDataset(Dataset):
     def __init__(self, input_vocab, output_vocab):
         self.input_vocab = input_vocab 
         self.output_vocab = output_vocab
+        self.j2v = input_vocab.use_jp
     
     def __len__(self):
         return len(self.input_vocab)
 
     def __getitem__(self):
         return len()
+
+class LangDataset(Dataset):
+    """ 
+    Subclass of Pytorch Dataset.
+    Holds sentence data from both languages.
+    """
+    def __init__(self, pairs, input_lang, output_lang, max_length=30):
+        self.pairs = pairs
+        self.input_lang = input_lang
+        self.output_lang = output_lang
+        self.max_length = max_length
+
+    def __len__(self):
+        return len(self.pairs)
+
+    def __getitem__(self, i):
+        return self.pairs[i]
+
+    def collate(self, batch):
+        batch_size = len(batch)
+        input_train = torch.LongTensor(batch_size, self.max_length).zero_()
+        target_train = torch.LongTensor(batch_size, self.max_length).zero_()
+
+        for i, pair in enumerate(batch):
+            input_train[i] = sen2idx(self.input_lang, pair[0], self.max_length)
+            target_train[i] = sen2idx(self.output_lang, pair[1], self.max_length)
+
+        return Variable(input_train), Variable(target_train)
+
+def _drop_filters(sentence):
+    return ''.join([char for char in sentence if char not in config.FILTERS]).strip().lower()
+
+def word_segment(lang, sentence):
+    words = None
+    if lang.use_jp:
+        norm_sen = ''.join([w for w in analyzer.analyze(sentence)])
+        words = [w for w in analyzer.analyze(_drop_filters(norm_sen))]
+    elif lang.use_vi:
+        norm_sen = _drop_filters(sentence)
+        words = [w for w in rdr.segmentRawSentences(vntk, norm_sen).split(' ')]
+    else:
+        words = [w for w in sentence.split(" ")]
+    return words
+
+def sen2idx(lang, sentence, max_length=30):
+    words = word_segment(lang, sentence)
+    indexes = [lang.word2index[word] for word in words]
+    result = torch.LongTensor(max_length)
+    result[:] = config.EOS_token
+    for i, index in enumerate(indexes):
+        result[i] = index
+    return result
