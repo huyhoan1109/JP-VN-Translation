@@ -14,7 +14,9 @@ def _getlines_txt(path):
 
 def preprocess(dataset_dir, use:float=1, j2v:bool=True):
     start = time.perf_counter()
-    if len(os.listdir('./data')) == 0:
+    if not os.path.exists(config.VOCAB_DIR):
+        os.mkdir(config.VOCAB_DIR)
+    if len(os.listdir(config.VOCAB_DIR)) == 0:
         # Creating in and target tokens
         input_file = dataset_dir + '/data-ja.txt' if j2v else dataset_dir + '/data-vi.txt'
         output_file = dataset_dir + '/data-vi.txt' if j2v else dataset_dir + '/data-ja.txt'
@@ -37,9 +39,10 @@ def preprocess(dataset_dir, use:float=1, j2v:bool=True):
             input_lang.add_sentence(input_sen)
             out_lang.add_sentence(output_sen)
             pbar.set_description(f"Load {dataset_dir}")
+        
         # Saving languages
-        input_lang.save('./data')
-        out_lang.save('./data')
+        input_lang.save(config.VOCAB_DIR)
+        out_lang.save(config.VOCAB_DIR)
     end = time.perf_counter()
     print(f'Finished processing in {round(end-start, 3)} seconds')
 
@@ -61,12 +64,12 @@ if __name__ == '__main__':
     parser.add_argument('-j2v', '--j2v', choices=[True, False], default=True, help='How much dataset used to create vocab')
     args = parser.parse_args()
     init_args(args)
-    with open('./data/ja.pk', 'rb') as f:
-        ja = pickle.load(f)
-        f.close()
-    with open('./data/vi.pk', 'rb') as f:
-        vi = pickle.load(f)
-        f.close()
-    print(len(ja))
-    print(len(vi))
+    # with open('./vocab/ja.pk', 'rb') as f:
+    #     ja = pickle.load(f)
+    #     f.close()
+    # with open('./vocab/vi.pk', 'rb') as f:
+    #     vi = pickle.load(f)
+    #     f.close()
+    # print(len(ja))
+    # print(len(vi))
     
