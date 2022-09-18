@@ -1,3 +1,4 @@
 VN-JP-NLP-Dataset/*
 data/*
 __pycache__/*
+vocab/*
