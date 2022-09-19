@@ -5,7 +5,7 @@ from tqdm import tqdm
 from bs4 import BeautifulSoup
 import concurrent.futures as cf
 
-def google_drive_downloader(id, path, file):
+def google_drive_downloader(id:str, path:str, file:str):
     URL = "https://docs.google.com/uc?export=download"
 
     if not os.path.exists(path):
@@ -35,13 +35,13 @@ def google_drive_downloader(id, path, file):
 
     save_content(response, path, file, temp_size) 
 
-def get_confirm_token(response):
+def get_confirm_token(response:requests.Response):
     for key, value in response.cookies.items():
         if key.startswith('download_warning'):
             return value
     return None
 
-def save_content(response, path, file, temp_size):
+def save_content(response:requests.Response, path:str, file:str, temp_size:int):
     chunk_size = 1024 * 1024 
     content_size = int(response.headers['Content-Length'])
     if content_size >= temp_size:

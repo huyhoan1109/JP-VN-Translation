@@ -5,13 +5,13 @@ import config
 import argparse
 from tqdm import tqdm
 
-def _getlines_txt(path):
+def _getlines_txt(path:str):
     with open(path, 'r', encoding='utf-8') as f:
         lines = f.read().split('\n')
     f.close()
     return lines
 
-def preprocess(dataset_dir, use:float=1, j2v:bool=True):
+def preprocess(dataset_dir:str, use:float=1, j2v:bool=True):
     # Start performance time counter
     start = time.perf_counter()
     
@@ -69,4 +69,3 @@ if __name__ == '__main__':
     parser.add_argument('-j2v', '--j2v', choices=[True, False], default=True, help='How much dataset used to create vocab')
     args = parser.parse_args()
     init_args(args)
-    

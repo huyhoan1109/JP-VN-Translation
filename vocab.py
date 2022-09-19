@@ -15,7 +15,7 @@ jptk = JPTKZ()
 analyzer = Analyzer(char_filters=config.JP_CHAR_FILTERS, tokenizer=jptk, token_filters=config.TOKEN_FILTERS)
 
 class Vocab:
-    def __init__(self, name, use_jp=False, use_vi=False):
+    def __init__(self, name:str, use_jp=False, use_vi=False):
         self.name = name
         self.word2index = {"SOS": 0, "EOS": 1}
         self.word2count = {"SOS": 0, "EOS": 0}
@@ -27,12 +27,12 @@ class Vocab:
         self.use_jp = use_jp
         self.use_vi = use_vi
 
-    def add_sentence(self, sentence):
+    def add_sentence(self, sentence:str):
         words = word_segment(self, sentence)
         for w in words:
             self.add_word(w)
 
-    def add_word(self, word):
+    def add_word(self, word:str):
         if word in self.word2count:
             self.word2count[word] += 1
         else:
@@ -41,7 +41,7 @@ class Vocab:
             self.index2word[self.n_words] = word
             self.n_words += 1
 
-    def remove_word(self, word):
+    def remove_word(self, word:str):
         if word != "SOS" and word != "EOS":
             self.n_words -= 1
             idx = self.word2index[word]
@@ -55,7 +55,7 @@ class Vocab:
                 self.word2index[last_word] = idx
                 self.index2word[idx] = last_word
     
-    def save(self, path):
+    def save(self, path:str):
         with open(path+'/'+self.name+'.pk', 'wb') as f:
             pickle.dump(self, f)
             f.close()
@@ -64,7 +64,7 @@ class Vocab:
         return self.n_words
 
 class VocabDataset(Dataset):
-    def __init__(self, pairs, input_lang, output_lang, max_length=30):
+    def __init__(self, pairs, input_lang:Vocab, output_lang:Vocab, max_length:int=30):
         self.pairs = pairs
         self.input_lang = input_lang
         self.output_lang = output_lang
@@ -73,10 +73,10 @@ class VocabDataset(Dataset):
     def __len__(self):
         return len(self.pairs)
 
-    def __getitem__(self, i):
+    def __getitem__(self, i:int):
         return self.pairs[i]
 
-    def collate(self, batch):
+    def collate(self, batch:int):
         batch_size = len(batch)
         input_train = torch.LongTensor(batch_size, self.max_length).zero_()
         target_train = torch.LongTensor(batch_size, self.max_length).zero_()
@@ -87,10 +87,10 @@ class VocabDataset(Dataset):
 
         return Variable(input_train), Variable(target_train)
 
-def _drop_filters(sentence):
+def _drop_filters(sentence:str):
     return ''.join([char for char in sentence if char not in config.FILTERS]).strip().lower()
 
-def word_segment(lang, sentence):
+def word_segment(lang:Vocab, sentence:str):
     words = None
     if lang.use_jp:
         norm_sen = ''.join([w for w in analyzer.analyze(sentence)])
@@ -99,10 +99,10 @@ def word_segment(lang, sentence):
         norm_sen = _drop_filters(sentence)
         words = [w for w in rdr.segmentRawSentences(vntk, norm_sen).split(' ')]
     else:
-        words = [w for w in sentence.split(" ")]
+        words = [w for w in _drop_filters(sentence).split(' ')]
     return words
 
-def sen2idx(lang, sentence, max_length=30):
+def sen2idx(lang:Vocab, sentence:str, max_length:int=30):
     words = word_segment(lang, sentence)
     indexes = [lang.word2index[word] for word in words]
     result = torch.LongTensor(max_length)
