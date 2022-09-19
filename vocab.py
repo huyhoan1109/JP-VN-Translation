@@ -15,7 +15,7 @@ jptk = JPTKZ()
 analyzer = Analyzer(char_filters=config.JP_CHAR_FILTERS, tokenizer=jptk, token_filters=config.TOKEN_FILTERS)
 
 class Vocab:
-    def __init__(self, name:str, use_jp=False, use_vi=False):
+    def __init__(self, name:str, use_jp:bool=False, use_vi:bool=False):
         self.name = name
         self.word2index = {"SOS": 0, "EOS": 1}
         self.word2count = {"SOS": 0, "EOS": 0}
