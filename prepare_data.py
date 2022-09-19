@@ -68,7 +68,7 @@ def multithread_executor(func, params, name:str="", showTime=True):
             try:
                 f.result()
             except:
-                print('An error occured when {name} !')
+                raise ValueError('An error occured when {name} !')
             i += 1
     end = time.perf_counter()
     if showTime:
