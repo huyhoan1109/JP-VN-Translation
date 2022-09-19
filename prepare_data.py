@@ -1,4 +1,5 @@
 import os
+from sys import argv
 import time
 import requests
 from tqdm import tqdm
@@ -57,6 +58,22 @@ def save_content(response:requests.Response, path:str, file:str, temp_size:int):
 
 WINRAR_path = r'C:\"Program Files"\WinRAR\UnRAR.exe'
 
+def multithread_executor(func, params, name:str="", showTime=True):
+    params_len = len(params)
+    start = time.perf_counter()
+    with cf.ThreadPoolExecutor() as executor:
+        results = [executor.submit(func, *params[i]) for i in range(params_len)]
+        i = 0
+        for f in cf.as_completed(results):
+            try:
+                f.result()
+            except:
+                print('An error occured when {name} !')
+            i += 1
+    end = time.perf_counter()
+    if showTime:
+        print(f'Finished {name} in {end-start} seconds')
+
 if __name__ == "__main__":
     path = './'
     file_ids = [
@@ -65,29 +82,9 @@ if __name__ == "__main__":
     file_name = [
         'data.rar',
     ]
-    start_dl = time.perf_counter()
-    with cf.ThreadPoolExecutor() as executor:
-        results = [executor.submit(google_drive_downloader, *[file_ids[i], path, file_name[i]]) for i in range(len(file_ids))]
-        i = 0
-        for f in cf.as_completed(results):
-            try:
-                f.result()
-            except:
-                print('An error occured when downloading '+file_name[i]+' !')
-            i += 1
-    end_dl = time.perf_counter()
-    print(f'Finished downloading in {end_dl-start_dl} seconds')
-    
-    start_unz = time.perf_counter()
-    with cf.ThreadPoolExecutor() as executor:
-        results = [executor.submit(os.system, WINRAR_path+' x '+path+file_name[i]+' '+path) for i in range(len(file_ids))]
-        i = 0
-        for f in cf.as_completed(results):
-            try:
-                f.result()
-                os.remove(path+file_name[i])
-            except:
-                print('An error occured when unzipping '+file_name[i]+' !')
-            i += 1
-    end_unz = time.perf_counter()
-    print(f'Finished unzipping in {end_unz-start_unz} seconds')
+    params1 = [[file_ids[i], path, file_name[i]] for i in range(len(file_ids))]
+    multithread_executor(google_drive_downloader, params1, 'download')
+    params2 = [[WINRAR_path+' x '+path+file_name[i]+' '+path] for i in range(len(file_ids))]
+    multithread_executor(os.system, params2, "unzip")
+    params3 = [[path + file_name[i]] for i in range(len(file_ids))]
+    multithread_executor(os.remove, params3, showTime=False)
