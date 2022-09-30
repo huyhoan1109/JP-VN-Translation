@@ -64,28 +64,28 @@ class Vocab:
         return self.n_words
 
 class VocabDataset(Dataset):
-    def __init__(self, pairs, input_lang:Vocab, output_lang:Vocab, max_length:int=30):
+    def __init__(self, pairs):
         self.pairs = pairs
-        self.input_lang = input_lang
-        self.output_lang = output_lang
-        self.max_length = max_length
-
     def __len__(self):
         return len(self.pairs)
 
     def __getitem__(self, i:int):
         return self.pairs[i]
 
-    def collate(self, batch:int):
+class Collate:
+    def __init__(self, input_lang:Vocab, output_lang:Vocab, max_length:int=30):
+        self.input_lang = input_lang
+        self.output_lang = output_lang
+        self.max_length = max_length
+    def __call__(self, batch):
+        # batch = 
         batch_size = len(batch)
-        input_train = torch.LongTensor(batch_size, self.max_length).zero_()
-        target_train = torch.LongTensor(batch_size, self.max_length).zero_()
-
-        for i, pair in enumerate(batch):
-            input_train[i] = sen2idx(self.input_lang, pair[0], self.max_length)
-            target_train[i] = sen2idx(self.output_lang, pair[1], self.max_length)
-
-        return Variable(input_train), Variable(target_train)
+        input_tensor = torch.Tensor(batch_size, self.max_length)
+        output_tensor = torch.Tensor(batch_size, self.max_length)
+        for i in range(batch_size):
+            input_tensor[i] = sen2idx(self.input_lang, batch[i][0], self.max_length)
+            output_tensor[i] = sen2idx(self.output_lang, batch[i][1], self.max_length)
+        return input_tensor, output_tensor
 
 def _drop_filters(sentence:str):
     return ''.join([char for char in sentence if char not in config.FILTERS]).strip().lower()
@@ -93,6 +93,7 @@ def _drop_filters(sentence:str):
 def word_segment(lang:Vocab, sentence:str):
     words = None
     if lang.use_jp:
+        print(sentence)
         norm_sen = ''.join([w for w in analyzer.analyze(sentence)])
         words = [w for w in analyzer.analyze(_drop_filters(norm_sen))]
     elif lang.use_vi:
@@ -105,7 +106,7 @@ def word_segment(lang:Vocab, sentence:str):
 def sen2idx(lang:Vocab, sentence:str, max_length:int=30):
     words = word_segment(lang, sentence)
     indexes = [lang.word2index[word] for word in words]
-    result = torch.LongTensor(max_length)
+    result = torch.Tensor(max_length)
     result[:] = config.EOS_token
     for i, index in enumerate(indexes):
         result[i] = index
