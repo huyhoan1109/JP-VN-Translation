@@ -17,13 +17,13 @@ analyzer = Analyzer(char_filters=config.JP_CHAR_FILTERS, tokenizer=jptk, token_f
 class Vocab:
     def __init__(self, name:str, use_jp:bool=False, use_vi:bool=False):
         self.name = name
-        self.word2index = {"SOS": 0, "EOS": 1}
-        self.word2count = {"SOS": 0, "EOS": 0}
-        self.index2word = {0: "SOS", 1: "EOS"}
-        self.n_words = 2
+        self.word2index = {"SOS": 0, "EOS": 1, "UNK":2}
+        self.word2count = {"SOS": 0, "EOS": 0, "UNK":0}
+        self.index2word = {0: "SOS", 1: "EOS", 2: "UNK"}
+        self.n_words = 3
         if use_jp:
             if use_vi:
-                ValueError("Can't use multiple tokenizers!")
+                ValueError("Each language can only have 1 tokenizers!")
         self.use_jp = use_jp
         self.use_vi = use_vi
         self.max_len = 0
@@ -107,7 +107,12 @@ def word_segment(lang:Vocab, sentence:str):
 def sen2idx(lang:Vocab, sentence:str):
     max_len = lang.max_len
     words = word_segment(lang, sentence)
-    indexes = [lang.word2index[word] for word in words]
+    indexes = []
+    for i in range(len(words)):
+        if words[i] not in lang.word2index:
+            indexes.append(lang.word2index['UNK'])
+        else:
+            indexes.append(lang.word2index[words[i]])
     result = torch.Tensor(max_len)
     result[:] = config.EOS_token
     for i, index in enumerate(indexes):

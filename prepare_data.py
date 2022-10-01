@@ -6,12 +6,6 @@ import config
 import argparse
 from tqdm import tqdm
 
-def _getlines_txt(path:str):
-    with open(path, 'r', encoding='utf-8') as f:
-        lines = f.read().split('\n')
-    f.close()
-    return lines
-
 def create_vocab(dataset_dir:str, use_percent:float=1, showTime=True):
     # Start performance time counter
     start = time.perf_counter()
@@ -25,23 +19,17 @@ def create_vocab(dataset_dir:str, use_percent:float=1, showTime=True):
 
     # If no vocabulary => create
     if len(os.listdir(config.VOCAB_DIR)) == 0:
-        # Creating in and target tokens
-        jp_file = dataset_dir + '/data-ja.txt'
-        vi_file = dataset_dir + '/data-vi.txt'
-        
         # open input and target file
-        jp_lines = _getlines_txt(jp_file)
-        vi_lines = _getlines_txt(vi_file)
-        use_len = len(jp_lines)
+        data = config.read_file(dataset_dir, None)
         # Initializing languages
         jp = vocab.Vocab('ja', use_jp=True)
         vi = vocab.Vocab('vi', use_vi=True)
-        pbar = tqdm(zip(jp_lines, vi_lines), total=use_len, leave=False)
+        pbar = tqdm(data, total=len(data[0]), leave=False)
         
         # Loading sentences
-        for jp_sen, vi_sen in pbar:
-            jp.add_sentence(jp_sen)
-            vi.add_sentence(vi_sen)
+        for j2v in pbar:
+            jp.add_sentence(j2v[0])
+            vi.add_sentence(j2v[1])
             pbar.set_description(f"Load {dataset_dir}")
         
         # Saving languages
@@ -66,7 +54,7 @@ def init_args():
         '-u', '--use', 
         type=float,
         default=config.USE_PERCENT, 
-        help=f'How much percentage is used (Default: {config.USE_PERCENT}%)'
+        help=f'How much percentage is used (Default: {config.USE_PERCENT} ~ {config.USE_PERCENT}%%)'
     )
     parser.add_argument(
         '--create-vocab',
@@ -82,16 +70,18 @@ def init_args():
     return args
 
 def run(args):
+    list_dir = os.listdir(config.ORIGINAL_DS_DIR)
     if args.list:
-        [print(file) for file in os.listdir(config.ORIGINAL_DS_DIR)]
+        print('Avaible Vocabulary: ')
+        [print(dir_name) for dir_name in list_dir]
         sys.exit()        
     if not os.path.exists(config.VOCAB_DIR):
         print("Creating JP-VI vocab:")
         dataset_dir = config.ORIGINAL_DS_DIR + args.create_vocab
         create_vocab(dataset_dir)
-    if args.use < 1 or args.use > 100:
-        print(f"Invalid using percentage! Set to default {config.USE_PERCENT}")
-        args.use = config.USE_PERCENT 
+    # if args.use < 1 or args.use > 100:
+    #     print(f"Invalid using percentage! Set to default {config.USE_PERCENT}")
+    #     args.use = config.USE_PERCENT 
     
 if __name__ == '__main__':
     args = init_args()
