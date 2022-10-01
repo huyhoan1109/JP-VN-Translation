@@ -78,14 +78,13 @@ class Collate:
         self.output_lang = output_lang
         self.max_length = max_length
     def __call__(self, batch):
-        # batch = 
         batch_size = len(batch)
         input_tensor = torch.Tensor(batch_size, self.max_length)
         output_tensor = torch.Tensor(batch_size, self.max_length)
         for i in range(batch_size):
             input_tensor[i] = sen2idx(self.input_lang, batch[i][0], self.max_length)
             output_tensor[i] = sen2idx(self.output_lang, batch[i][1], self.max_length)
-        return input_tensor, output_tensor
+        return Variable(input_tensor), Variable(output_tensor)
 
 def _drop_filters(sentence:str):
     return ''.join([char for char in sentence if char not in config.FILTERS]).strip().lower()

@@ -14,10 +14,11 @@ def get_loader(
     pin_memory:bool=True,
     train=True
 ):
-    j2v = [
-        ['私は', 'tôi'],
-        ['君', 'cậu']
-    ]
+    j2v = {
+        {'私は': 'tôi'},
+        {'君': 'cậu'},
+    }
+    # j2v: num_sentence, 2
     with open(f"{vocab_dir}/ja.pk", "rb") as f:
         lang1 = pickle.load(f)
     with open(f"{vocab_dir}/vi.pk", "rb") as f:

@@ -1,5 +1,4 @@
 import os
-from sys import argv
 import time
 import requests
 from tqdm import tqdm
