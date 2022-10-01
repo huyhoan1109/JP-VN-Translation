@@ -2,41 +2,49 @@
 import vocab
 import config
 
+import json
 import pickle
 from torch.utils.data import DataLoader
 
+def read_file(root, format='.json'):
+    data = []
+    if format == '.json': 
+        with open(root, 'r', encoding='utf-8') as f:
+            translate = json.load(f)
+        for i in translate:
+            data.append([str(i), str(translate[i])])
+    else:
+        with open(root, 'rb', encoding='utf-8') as f:
+            data = pickle.load(f)
+    return data
+
 def get_loader(
     root,
+    format='.json',
     vocab_dir:str=config.VOCAB_DIR,
     batch_size:int=1,
     shuffle:bool=True,
-    num_workers:int=8,
     pin_memory:bool=True,
-    train=True
 ):
-    j2v = {
-        {'私は': 'tôi'},
-        {'君': 'cậu'},
-    }
-    # j2v: num_sentence, 2
+    data = read_file(root, format)
+    dataset = vocab.VocabDataset(data)
     with open(f"{vocab_dir}/ja.pk", "rb") as f:
         lang1 = pickle.load(f)
     with open(f"{vocab_dir}/vi.pk", "rb") as f:
         lang2 = pickle.load(f)
-    dataset = vocab.VocabDataset(j2v)
+    dataset = vocab.VocabDataset(data)
     loader = DataLoader(
         dataset, 
         batch_size=batch_size,
         shuffle=shuffle,
-        num_workers=num_workers,
+        num_workers=config.N_WORKERS,
         pin_memory=pin_memory,
         collate_fn=vocab.Collate(lang1, lang2, 4)
     )
     return loader
 
-
 def main():
-    loader = get_loader(config.VOCAB_DIR)
+    loader = get_loader('test.json')
     for idx, data in enumerate(loader):
         print(data)
         break
