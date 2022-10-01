@@ -1,4 +1,3 @@
-
 import vocab
 import config
 
