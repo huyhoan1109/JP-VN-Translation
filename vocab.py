@@ -27,7 +27,7 @@ class Vocab:
         self.use_jp = use_jp
         self.use_vi = use_vi
         self.max_len = 0
-        
+
     def add_sentence(self, sentence:str):
         words = word_segment(self, sentence)
         if len(words) > self.max_len:

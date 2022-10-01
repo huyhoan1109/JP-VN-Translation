@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import vocab
 import config
@@ -16,7 +17,8 @@ def create_vocab(dataset_dir:str, use_percent:float=1, showTime=True):
     start = time.perf_counter()
     
     # Whether directory is existed or not
-    if not os.path.exists(config.VOCAB_DIR):
+    if not os.path.exists(config.DATA_DIR):
+        os.mkdir(config.DATA_DIR)
         os.mkdir(config.VOCAB_DIR)
         os.mkdir(config.TRAIN_DIR)
         os.mkdir(config.TEST_DIR)
@@ -81,7 +83,8 @@ def init_args():
 
 def run(args):
     if args.list:
-        [print(file) for file in os.listdir(config.ORIGINAL_DS_DIR)]        
+        [print(file) for file in os.listdir(config.ORIGINAL_DS_DIR)]
+        sys.exit()        
     if not os.path.exists(config.VOCAB_DIR):
         print("Creating JP-VI vocab:")
         dataset_dir = config.ORIGINAL_DS_DIR + args.create_vocab
