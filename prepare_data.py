@@ -30,20 +30,16 @@ def create_vocab(dataset_dir:str, use_percent:float=1, showTime=True):
         # open input and target file
         jp_lines = _getlines_txt(jp_file)
         vi_lines = _getlines_txt(vi_file)
-        use_len = int(len(jp_lines) * use_percent)
-
-        use_jp_lines = jp_lines[:use_len]
-        use_vi_lines = vi_lines[:use_len]
-
+        use_len = len(jp_lines)
         # Initializing languages
         jp = vocab.Vocab('ja', use_jp=True)
         vi = vocab.Vocab('vi', use_vi=True)
-        pbar = tqdm(zip(use_jp_lines, use_vi_lines), total=use_len, leave=False)
+        pbar = tqdm(zip(jp_lines, vi_lines), total=use_len, leave=False)
         
         # Loading sentences
-        for input_sen, output_sen in pbar:
-            jp.add_sentence(input_sen)
-            vi.add_sentence(output_sen)
+        for jp_sen, vi_sen in pbar:
+            jp.add_sentence(jp_sen)
+            vi.add_sentence(vi_sen)
             pbar.set_description(f"Load {dataset_dir}")
         
         # Saving languages
