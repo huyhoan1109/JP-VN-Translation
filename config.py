@@ -18,9 +18,10 @@ MIN_VOCAB_WORDS = 2
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 ORIGINAL_DS_DIR = './VN-JP-NLP-Dataset/'
-INIT_VOCAB_DIR = './VN-JP-NLP-Dataset/Glosbe282K'
+INIT_VOCAB = 'wiki_20K'
 VOCAB_DIR = './data/vocab'
-DATA_DIR = './data/'
+TRAIN_DIR = './data/train'
+TEST_DIR = './data/test'
 USE_PERCENT = 80
 N_WORKERS = 0 # if you have GPU then change as you like
 JP_CHAR_FILTERS = [UnicodeNormalizeCharFilter()]

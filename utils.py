@@ -31,13 +31,14 @@ def get_loader(
     with open(f"{config.VOCAB_DIR}/vi.pk", "rb") as f:
         lang2 = pickle.load(f)
     dataset = vocab.VocabDataset(data)
+    collate_fn = vocab.Collate(lang1, lang2)
     loader = DataLoader(
         dataset, 
         batch_size=batch_size, # Change later
         shuffle=shuffle,
         num_workers=config.N_WORKERS,
         pin_memory=pin_memory,
-        collate_fn=vocab.Collate(lang1, lang2, 4)
+        collate_fn=collate_fn
     )
     return loader
 

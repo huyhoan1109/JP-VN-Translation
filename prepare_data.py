@@ -18,8 +18,8 @@ def create_vocab(dataset_dir:str, use_percent:float=1, showTime=True):
     # Whether directory is existed or not
     if not os.path.exists(config.VOCAB_DIR):
         os.mkdir(config.VOCAB_DIR)
-        os.mkdir(config.DATA_DIR+'train')
-        os.mkdir(config.DATA_DIR+'test')
+        os.mkdir(config.TRAIN_DIR)
+        os.mkdir(config.TEST_DIR)
 
     # If no vocabulary => create
     if len(os.listdir(config.VOCAB_DIR)) == 0:
@@ -49,15 +49,10 @@ def create_vocab(dataset_dir:str, use_percent:float=1, showTime=True):
     # End performance time counter
     end = time.perf_counter()
     if showTime:
-        print(f'Finished processing in {round(end-start, 3)} seconds')
+        print(f'Finished in {round(end-start, 3)} seconds')  
 
-def preprocess(
-    dest_dir:str=config.DATA_DIR, 
-    vocab_dir:str=config.VOCAB_DIR, 
-    train:float=0.8
-):
-    pass    
-
+def create_train_test(use_percent:float):
+    pass
 def init_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -74,13 +69,12 @@ def init_args():
     parser.add_argument(
         '--create-vocab',
         type=str,
-        default='Glosbe282K',
-        help='Create Vocab (Default: Glosbe282K)'
+        default=config.INIT_VOCAB,
+        help=f'Create Vocab (Default: {config.INIT_VOCAB})'
     )
     parser.add_argument(
         '-tr', '--train',
-        type=str,
-        default='Glosbe282K'
+        type=str
     )
     args = parser.parse_args()
     return args
@@ -91,7 +85,7 @@ def run(args):
     if not os.path.exists(config.VOCAB_DIR):
         print("Creating JP-VI vocab:")
         dataset_dir = config.ORIGINAL_DS_DIR + args.create_vocab
-        create_vocab(dataset_dir, use_percent=1)
+        create_vocab(dataset_dir)
     if args.use < 1 or args.use > 100:
         print(f"Invalid using percentage! Set to default {config.USE_PERCENT}")
         args.use = config.USE_PERCENT 

@@ -26,9 +26,12 @@ class Vocab:
                 ValueError("Can't use multiple tokenizers!")
         self.use_jp = use_jp
         self.use_vi = use_vi
-
+        self.max_len = 0
+        
     def add_sentence(self, sentence:str):
         words = word_segment(self, sentence)
+        if len(words) > self.max_len:
+            self.max_len = len(words)
         for w in words:
             self.add_word(w)
 
@@ -68,22 +71,22 @@ class VocabDataset(Dataset):
         self.pairs = pairs
     def __len__(self):
         return len(self.pairs)
-
     def __getitem__(self, i:int):
         return self.pairs[i]
 
 class Collate:
-    def __init__(self, input_lang:Vocab, output_lang:Vocab, max_length:int=30):
+    def __init__(self, input_lang:Vocab, output_lang:Vocab):
         self.input_lang = input_lang
         self.output_lang = output_lang
-        self.max_length = max_length
     def __call__(self, batch):
         batch_size = len(batch)
-        input_tensor = torch.Tensor(batch_size, self.max_length)
-        output_tensor = torch.Tensor(batch_size, self.max_length)
+        in_len = self.input_lang.max_len
+        out_len = self.output_lang.max_len 
+        input_tensor = torch.Tensor(batch_size, in_len)
+        output_tensor = torch.Tensor(batch_size, out_len)
         for i in range(batch_size):
-            input_tensor[i] = sen2idx(self.input_lang, batch[i][0], self.max_length)
-            output_tensor[i] = sen2idx(self.output_lang, batch[i][1], self.max_length)
+            input_tensor[i] = sen2idx(self.input_lang, batch[i][0])
+            output_tensor[i] = sen2idx(self.output_lang, batch[i][1])
         return Variable(input_tensor), Variable(output_tensor)
 
 def _drop_filters(sentence:str):
@@ -101,10 +104,11 @@ def word_segment(lang:Vocab, sentence:str):
         words = [w for w in _drop_filters(sentence).split(' ')]
     return words
 
-def sen2idx(lang:Vocab, sentence:str, max_length:int=30):
+def sen2idx(lang:Vocab, sentence:str):
+    max_len = lang.max_len
     words = word_segment(lang, sentence)
     indexes = [lang.word2index[word] for word in words]
-    result = torch.Tensor(max_length)
+    result = torch.Tensor(max_len)
     result[:] = config.EOS_token
     for i, index in enumerate(indexes):
         result[i] = index
