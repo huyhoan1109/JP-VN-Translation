@@ -21,21 +21,20 @@ def read_file(root, format='.json'):
 def get_loader(
     root,
     format='.json',
-    vocab_dir:str=config.VOCAB_DIR,
     batch_size:int=1,
     shuffle:bool=True,
     pin_memory:bool=True,
 ):
     data = read_file(root, format)
     dataset = vocab.VocabDataset(data)
-    with open(f"{vocab_dir}/ja.pk", "rb") as f:
+    with open(f"{config.VOCAB_DIR}/ja.pk", "rb") as f:
         lang1 = pickle.load(f)
-    with open(f"{vocab_dir}/vi.pk", "rb") as f:
+    with open(f"{config.VOCAB_DIR}/vi.pk", "rb") as f:
         lang2 = pickle.load(f)
     dataset = vocab.VocabDataset(data)
     loader = DataLoader(
         dataset, 
-        batch_size=batch_size,
+        batch_size=batch_size, # Change later
         shuffle=shuffle,
         num_workers=config.N_WORKERS,
         pin_memory=pin_memory,
