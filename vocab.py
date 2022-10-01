@@ -93,7 +93,6 @@ def _drop_filters(sentence:str):
 def word_segment(lang:Vocab, sentence:str):
     words = None
     if lang.use_jp:
-        print(sentence)
         norm_sen = ''.join([w for w in analyzer.analyze(sentence)])
         words = [w for w in analyzer.analyze(_drop_filters(norm_sen))]
     elif lang.use_vi:

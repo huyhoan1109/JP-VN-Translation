@@ -20,8 +20,12 @@ EOS_token = 1
 MIN_VOCAB_WORDS = 2
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
-DATASETS_DIR = './VN-JP-NLP-Dataset/'
-VOCAB_DIR = './vocab'
+ORIGINAL_DS_DIR = './VN-JP-NLP-Dataset/'
+INIT_VOCAB_DIR = './VN-JP-NLP-Dataset/Glosbe282K'
+VOCAB_DIR = './data/t'
+TRAIN_DIR = './data/train'
+TEST_DIR = './data/test'
+USE_PERCENT = 80
 JP_CHAR_FILTERS = [UnicodeNormalizeCharFilter()]
 TOKEN_FILTERS = [POSStopFilter(['記号','助詞']), LowerCaseFilter(), ExtractAttributeFilter('surface')]
 FILTERS = list(string.punctuation) + list(string.digits)
