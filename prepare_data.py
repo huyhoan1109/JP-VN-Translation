@@ -18,7 +18,11 @@ def preprocess(dataset_dir:str, use:float=1):
     # Whether directory is existed or not
     if not os.path.exists(config.VOCAB_DIR):
         os.mkdir(config.VOCAB_DIR)
-    
+    if not os.path.exists(config.TRAIN_DIR):
+        os.mkdir(config.TRAIN_DIR)
+    if not os.path.exists(config.TEST_DIR):
+        os.mkdir(config.TEST_DIR)
+        
     # If no vocabulary => create
     if len(os.listdir(config.VOCAB_DIR)) == 0:
         # Creating in and target tokens
