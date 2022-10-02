@@ -22,9 +22,10 @@ DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 ORIGINAL_DS_DIR = './VN-JP-NLP-Dataset/'
 INIT_VOCAB = 'Tatoeba_2K'
 DATA_DIR = './data'
-VOCAB_DIR = './data/vocab'
-TRAIN_DIR = './data/train'
-TEST_DIR = './data/test'
+VOCAB_DIR = './data/vocab/'
+TRAIN_DIR = './data/train/'
+TEST_DIR = './data/test/'
+LOADER_DIR = './loader/'
 USE_PERCENT = 80
 N_WORKERS = 0 # if you have GPU then change as you like
 JP_CHAR_FILTERS = [UnicodeNormalizeCharFilter()]
@@ -52,3 +53,5 @@ def read_file(root, format=None):
     except IOError:
         print("An IOError has occured!")
     return data
+# data = read_file(ORIGINAL_DS_DIR+INIT_VOCAB)
+# print(data)

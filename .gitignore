@@ -1,3 +1,4 @@
 VN-JP-NLP-Dataset/*
 data/*
+loader/*
 __pycache__/*
